@@ -3,8 +3,12 @@ import joiRouter from 'koa-joi-router'
 
 import * as DAL from './src/DAL.mjs'
 
-const router = joiRouter()
 const app = new Koa()
+
+// run webserver when server.mjs invoked directly
+if (process.argv.length >= 2 && process.argv[1].match(/server.mjs$/)) {
+    app.listen(3001)
+}
 
 // CORS override
 app.use((ctx, next) => {
@@ -45,9 +49,8 @@ app.use(async (ctx, next) => {
     }
 });
 
+const router = joiRouter()
 app.use(router.middleware())
-//app.listen(3001)
-export default app
 
 router.get("/ping", async ctx => {
     ctx.body = 'pong'
@@ -108,3 +111,5 @@ router.get("/place/:placeId", async ctx => {
         }
     }
 })
+
+export default app
