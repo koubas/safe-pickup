@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import joiRouter from 'koa-joi-router'
+import bodyParser from 'koa-bodyparser'
 
 import * as DAL from './src/DAL.mjs'
 
@@ -9,6 +10,9 @@ const app = new Koa()
 if (process.argv.length >= 2 && process.argv[1].match(/server.mjs$/)) {
     app.listen(3001)
 }
+
+// body parser 
+app.use(bodyParser());
 
 // CORS override
 app.use((ctx, next) => {
@@ -25,6 +29,7 @@ app.use((ctx, next) => {
 // auth
 app.use(async (ctx, next) => {
     if (
+        ctx.request.url.match(/^\/admin\//) ||
         ctx.request.url.match(/^\/place-public\//) ||
         ctx.request.url.match(/^\/ping$/) ||
         ctx.request.method === 'OPTIONS'
@@ -110,6 +115,26 @@ router.get("/place/:placeId", async ctx => {
         } else {
             console.log(e)
             ctx.res.statusCode = 500
+        }
+    }
+})
+
+router.post("/admin/auth", async ctx => {
+    try {
+        if (
+            ctx.request.body.placeId !== undefined &&
+            ctx.request.body.password !== undefined &&
+            await DAL.adminAuth(ctx.request.body.placeId, ctx.request.body.password)
+        ) {
+            ctx.res.statusCode = 200
+        } else {
+            throw new Error("login_failed")
+        }
+    } catch(e) {
+        ctx.res.statusMessage = "Bad login o password"
+        ctx.res.statusCode = 401
+        if (!(e instanceof Error && e.message == 'login_failed') && !(e instanceof DAL.ErrorPlaceNotFound)) {
+            console.log(e)
         }
     }
 })

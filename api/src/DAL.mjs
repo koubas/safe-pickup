@@ -1,4 +1,5 @@
 import AWS from 'aws-sdk'
+import bcrypt from 'bcrypt'
 
 export class ErrorPlaceNotFound extends Error{ constructor() { super("ERR_PLACE_NOT_FOUND")} } 
 
@@ -84,4 +85,20 @@ export async function auth(authKey) {
         }
     }
     return null
+}
+
+export async function adminAuth(placeId, password) {
+    try {
+        const place = await getPlace(placeId)
+
+        // twin-bcrypt with native support for $2y$ is slow and this works
+        const fixedHash = place.admin_password.replace(/^\$2y\$/, "$2a$")
+
+        return await bcrypt.compare(password, fixedHash)
+    } catch (e) {
+        if (!e instanceof ErrorPlaceNotFound) {
+            console.log(e)
+        }
+        throw e
+    }
 }

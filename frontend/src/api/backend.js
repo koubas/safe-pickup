@@ -1,5 +1,5 @@
-//const apiUrl = "http://10.107.11.67:3001"
-const apiUrl = "https://uy2ca9ys1c.execute-api.eu-central-1.amazonaws.com/dev"
+const apiUrl = "http://10.107.11.67:3001"
+//const apiUrl = "https://uy2ca9ys1c.execute-api.eu-central-1.amazonaws.com/dev"
 
 export async function getPlacePublicInfo(placeId) {
     const res = await fetch(`${apiUrl}/place-public/${placeId}`)
@@ -31,4 +31,17 @@ export async function getPlace(placeId, visitorId) {
         }
     }
     return result
+}
+
+export async function adminAuth(placeId, password) {
+    const res = await fetch(`${apiUrl}/admin/auth`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ placeId, password }),
+    })
+    return {
+        statusCode: res.status
+    }
 }
