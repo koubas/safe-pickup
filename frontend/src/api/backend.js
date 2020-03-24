@@ -45,3 +45,16 @@ export async function adminAuth(placeId, password) {
         statusCode: res.status
     }
 }
+
+export async function registerPlace(placeName, password) {
+    const res = await fetch(`${apiUrl}/register-place`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ placeName, password }),
+    })
+    return {
+        statusCode: res.status
+    }
+}

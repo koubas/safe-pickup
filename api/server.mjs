@@ -31,6 +31,7 @@ app.use(async (ctx, next) => {
     if (
         ctx.request.url.match(/^\/admin\//) ||
         ctx.request.url.match(/^\/place-public\//) ||
+        ctx.request.url.match(/^\/register-place$/) ||
         ctx.request.url.match(/^\/ping$/) ||
         ctx.request.method === 'OPTIONS'
     ) {
@@ -55,6 +56,7 @@ app.use(async (ctx, next) => {
 });
 
 const router = joiRouter()
+const Joi = joiRouter.Joi
 app.use(router.middleware())
 
 router.get("/ping", async ctx => {
@@ -111,7 +113,7 @@ router.get("/place/:placeId", async ctx => {
     } catch(e) {
         ctx.res.statusMessage = e.name
         if (e instanceof DAL.ErrorPlaceNotFound) {
-            ctx.response.code = 404
+            ctx.res.statusCode = 404
         } else {
             console.log(e)
             ctx.res.statusCode = 500
@@ -135,6 +137,35 @@ router.post("/admin/auth", async ctx => {
         ctx.res.statusCode = 401
         if (!(e instanceof Error && e.message == 'login_failed') && !(e instanceof DAL.ErrorPlaceNotFound)) {
             console.log(e)
+        }
+    }
+})
+
+router.route({
+    method: "post",
+    path: "/register-place",
+    validate: {
+        type: "json",
+        body: {
+            placeName: Joi.string().max(50),
+            password: Joi.string().min(8).max(50),
+        }
+    },
+    handler: async ctx => {
+        try {
+            const placeId = await DAL.registerPlace(ctx.request.body.placeName, ctx.request.body.password)
+            
+            if (placeId === null) {
+                ctx.res.statusCode = 500
+            } else {
+                ctx.res.statusCode = 200
+                ctx.res.body = {
+                    placeId
+                }
+            }
+        } catch(e) {
+            console.log(e)
+            ctx.res.statusCode = 500
         }
     }
 })

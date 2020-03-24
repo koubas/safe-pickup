@@ -1,7 +1,9 @@
 import AWS from 'aws-sdk'
 import bcrypt from 'bcrypt'
+import moment from 'moment-timezone'
 
-export class ErrorPlaceNotFound extends Error{ constructor() { super("ERR_PLACE_NOT_FOUND")} } 
+export class ErrorPlaceNotFound extends Error{ constructor() { super("ERR_PLACE_NOT_FOUND")} }
+export class ErrorPlaceExists extends Error{ constructor() { super("ERR_PLACE_EXISTS")} }
 
 AWS.config.update({
     region: "eu-central-1",
@@ -21,7 +23,7 @@ export async function getPlace(placeId) {
         (err, data) =>{
             if (err !== null) {
                 reject(err)
-            } else if (data.Items.length !== 1) {
+            } else if (data.Items.length !== 1 || !data.Items[0].approved) {
                 reject(new ErrorPlaceNotFound())
             } else {
                 resolve(data.Items[0])
@@ -31,6 +33,7 @@ export async function getPlace(placeId) {
 }
 
 export async function getVisitsByPlace(placeId) {
+
     const docClient = new AWS.DynamoDB.DocumentClient()
     return new Promise((resolve, reject) =>{
         docClient.query({
@@ -101,4 +104,53 @@ export async function adminAuth(placeId, password) {
         }
         throw e
     }
+}
+
+export async function registerPlace(placeName, password) {
+    const docClient = new AWS.DynamoDB.DocumentClient()
+    
+    const placeId = 'bbcdef'
+    const existingPlace = await new Promise((resolve, reject) =>{
+        docClient.scan({
+            TableName: "safe-pickup-place",
+            FilterExpression: "#name = :placeName",
+            ExpressionAttributeNames: {
+                '#name': 'name'
+            },
+            ExpressionAttributeValues: {
+                ':placeName': placeName,
+            }
+        },
+        (err, data) =>{
+            if (err !== null) {
+                reject(err)
+            } else {
+                resolve(data.Items)
+            }
+        })
+    })
+
+    if (existingPlace.length > 0) {
+        throw new ErrorPlaceExists()
+    }
+
+    return new Promise(async (resolve, reject) =>{
+        docClient.put({
+            TableName: "safe-pickup-place",
+            Item: {
+                id: placeId,
+                name: placeName,
+                admin_password: await bcrypt.hash(password, await bcrypt.genSalt()),
+                created: moment().toISOString(true),
+                approved: false,
+            }
+        },
+        (err) =>{
+            if (err !== null) {
+                reject(err)
+            } else {
+                resolve(placeId)
+            }
+        })
+    })
 }
