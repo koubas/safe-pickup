@@ -88,19 +88,21 @@ router.get("/place/:placeId", async ctx => {
             return (visit.visitor_id === ctx.state.auth.visitorId)  ? visit : acc
         })
 
-        visits = visits
-
-        // remove myVisit from visits
-        .filter(visit => visit.visitor_id !== ctx.state.auth.visitorId)
-        
-        // redact visits (return just visit times)
-        .map(item => ({ at: item.at }))
-
         ctx.body = {
-            ...place,
-            myVisit,
+            id: place.id,
+            name: place.name,
+            opens: place.opens,
+            closes: place.closes,
+            myVisit: visits
+                    .reduce((acc, visit) => {
+                        return (visit.visitor_id === ctx.state.auth.visitorId)  ? visit : acc
+                    }),
             visits: visits
-        }
+                    // remove myVisit from visits
+                    .filter(visit => visit.visitor_id !== ctx.state.auth.visitorId)
+                    // redact visits (return just visit times)
+                    .map(item => ({ at: item.at }))
+            }
     } catch(e) {
         ctx.res.statusMessage = e.name
         if (e instanceof DAL.ErrorPlaceNotFound) {
