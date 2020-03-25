@@ -33,6 +33,24 @@ export async function getPlace(placeId, visitorId) {
     return result
 }
 
+export async function updateVisit(at, code) {
+    const res = await fetch(`${apiUrl}/visit`, {
+        method: "PATCH",
+        headers: {
+            'Auth': code,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ at }),
+    })
+    const result = {
+        statusCode: res.status
+    }
+    if (res.statusCode === 200) {
+        result.place = await res.json()
+    }
+    return result
+}
+
 export async function adminAuth(placeId, password) {
     const res = await fetch(`${apiUrl}/admin/auth`, {
         method: "POST",

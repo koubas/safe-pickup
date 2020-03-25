@@ -74,7 +74,7 @@ export default {
     async submit() {
       const place = await getPlace(this.$route.params.placeId, this.visitorCode)
       if (place.statusCode === 200) {
-        this.$router.push({ name: 'PickTime', params: { place } })
+        this.$router.push({ name: 'PickTime', params: { place, visitorCode: `${place.id}-${this.visitorCode}` } })
       } else if (place.statusCode === 401) {
         this.errorMessage = "Neplatný ověřovací kód, zkuste jej zadat znovu"
       } else {

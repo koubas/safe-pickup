@@ -162,6 +162,26 @@ router.get("/place/:placeId", async ctx => {
 })
 
 router.route({
+    method: "PATCH",
+    path: "/visit",
+    validate: {
+        type: "json",
+        body: {
+            at: Joi.string()
+        }
+    },
+    handler: async ctx => {
+        try {
+            await DAL.getUpdateMyVisit(ctx.state.auth.placeId, ctx.state.auth.visitorId, ctx.request.body.at)
+            ctx.res.statusCode = 200
+        } catch(e) {
+            console.log(e)
+            ctx.res.statusCode = 500
+        }
+    }
+})
+
+router.route({
     method: "post",
     path: "/admin/auth",
     validate: {

@@ -75,6 +75,33 @@ export async function getVisitorByPlaceAndCode(placeId, code) {
     })
 }
 
+export async function getUpdateMyVisit(placeId, visitorId, at) {
+    const docClient = new AWS.DynamoDB.DocumentClient()
+    await new Promise(async (resolve, reject) =>{
+        docClient.update({
+            TableName: "safe-pickup-visit",
+            Key: {
+                visitor_id: visitorId,
+                place_id: placeId,
+            },
+            ExpressionAttributeNames: {
+                '#at': 'at'
+            },
+            UpdateExpression: "SET #at = :at",
+            ExpressionAttributeValues: {
+                ":at": at,
+            }
+        },
+        (err) =>{
+            if (err !== null) {
+                reject(err)
+            } else {
+                resolve(placeId)
+            }
+        })
+    })
+}
+
 export async function auth(authKey) {
     const parts = authKey.split('-') 
     if (parts.length !== 2) {
@@ -85,7 +112,8 @@ export async function auth(authKey) {
     const result = await getVisitorByPlaceAndCode(placeId, visitorId)
     if (Array.isArray(result) && result.length === 1) {
         return {
-            visitorId
+            visitorId,
+            placeId,
         }
     }
     return null

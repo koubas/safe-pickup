@@ -1,6 +1,16 @@
 <template>
   <div :class="`container ${vertical ? 'portrait' : 'landscape'}`">
-    <v-slider id="myslider" class="large-slider" v-model="slider" :min="min" :max="max" thumb-label="always" thumb-size=62 :vertical="vertical">
+    <v-slider
+      id="myslider"
+      class="large-slider"
+      v-model="slider"
+      @end="emitEnd"
+      :min="min"
+      :max="max"
+      thumb-label="always"
+      thumb-size=62
+      :vertical="vertical"
+    >
       <template v-slot:thumb-label>
         {{ formatedTime }}
       </template>
@@ -9,7 +19,7 @@
 </template>
 
 <script>
-
+import moment from 'moment-timezone'
 export default {
   name: "TimeAxis",
   components: {},
@@ -17,7 +27,6 @@ export default {
   props: {
     place: Object
   },
-
   data() {
     return {
       slider: 0,
@@ -40,6 +49,11 @@ export default {
   },
 
   methods: {
+    emitEnd() {
+      this.$emit("end", {
+        moment: new moment(this.slider)
+      })
+    },
     orientationChange() {
       this.vertical = window.screen.orientation.type.match(/portrait/) !== null
     },
@@ -50,18 +64,24 @@ export default {
       })
       this.visitElms = []
       this.place.visits.forEach(visit => {
+        if (visit.at.length <= 1) {
+          // space means empty (dynamodb)
+          return
+        }
         const at = (new Date(visit.at)).getTime()
-        const percent = (at - this.min) / (this.max - this.min) * 100
+        const percent = 100 - (at - this.min) / (this.max - this.min) * 100
         let newElm = document.createElement('div')
         newElm.style.position = 'absolute'
         if (this.vertical) {
           newElm.style.top = `${ percent }%`
           newElm.style.left = '50%'
+          newElm.style.marginTop = '-5px'
           newElm.style.marginLeft = '-5px'
         } else {
           newElm.style.left = `${ percent }%`
           newElm.style.top = '50%'
-        newElm.style.marginTop = '-5px'
+          newElm.style.marginTop = '-5px'
+          newElm.style.marginLeft = '-5px'
         }
         newElm.style.borderRadius = '50%'
         newElm.style.width = '10px'
