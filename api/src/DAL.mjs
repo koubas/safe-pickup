@@ -135,10 +135,10 @@ export async function adminAuth(placeId, password) {
     }
 }
 
-export async function registerPlace(placeName, password) {
+export async function registerPlace(placeName, email, password) {
     const docClient = new AWS.DynamoDB.DocumentClient()
     
-    const placeId = randomString.generate({ length: 8 }).toLowerCase()
+    const placeId = randomString.generate({ length: 6 }).toLowerCase()
 
     const existingPlace = await new Promise((resolve, reject) =>{
         docClient.scan({
@@ -171,6 +171,7 @@ export async function registerPlace(placeName, password) {
                 id: placeId,
                 name: placeName,
                 admin_password: await bcrypt.hash(password, await bcrypt.genSalt()),
+                email: email,
                 created: moment().toISOString(true),
                 approved: false,
             }

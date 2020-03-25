@@ -215,18 +215,19 @@ router.route({
         type: "json",
         body: {
             placeName: Joi.string().min(10).max(50),
+            email: Joi.string().min(5).max(50),
             password: Joi.string().min(8).max(50),
         }
     },
     handler: async ctx => {
         try {
-            const placeId = await DAL.registerPlace(ctx.request.body.placeName, ctx.request.body.password)
+            const placeId = await DAL.registerPlace(ctx.request.body.placeName, ctx.request.body.email, ctx.request.body.password)
             
             if (placeId === null) {
                 ctx.res.statusCode = 500
             } else {
                 ctx.res.statusCode = 200
-                ctx.res.body = {
+                ctx.body = {
                     placeId
                 }
             }

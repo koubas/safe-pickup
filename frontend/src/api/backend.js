@@ -45,7 +45,7 @@ export async function updateVisit(at, code) {
     const result = {
         statusCode: res.status
     }
-    if (res.statusCode === 200) {
+    if (res.status === 200) {
         result.place = await res.json()
     }
     return result
@@ -68,17 +68,24 @@ export async function adminAuth(placeId, password) {
     return result
 }
 
-export async function registerPlace(placeName, password) {
+export async function registerPlace(placeName, email, password) {
     const res = await fetch(`${apiUrl}/register-place`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ placeName, password }),
+        body: JSON.stringify({ placeName, email, password }),
     })
-    return {
+    let result = {
         statusCode: res.status
     }
+    if (res.status === 200) {
+        result = {
+            ...result,
+            ...await res.json(),
+        }
+    }
+    return result
 }
 
 export async function adminGetPlace(authKey) {
