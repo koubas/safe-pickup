@@ -2,6 +2,9 @@ import Koa from 'koa'
 import joiRouter from 'koa-joi-router'
 import bodyParser from 'koa-bodyparser'
 
+import jsBase64 from 'js-base64'
+const { Base64 } = jsBase64
+
 import * as DAL from './src/DAL.mjs'
 
 const app = new Koa()
@@ -35,6 +38,7 @@ app.use(async (ctx, next) => {
         ctx.request.url.match(/^\/ping$/) ||
         ctx.request.method === 'OPTIONS'
     ) {
+        // skip auth now
         return next()
     }
   
@@ -42,8 +46,8 @@ app.use(async (ctx, next) => {
     try {
         const result = await DAL.auth(authKey)
         if (result === null) {
-        ctx.res.statusCode = 401
-        // no next!!
+            ctx.res.statusCode = 401
+            // no next!!
         } else {
             ctx.state.auth = result
             return next();
@@ -52,6 +56,42 @@ app.use(async (ctx, next) => {
         console.log(e)
         ctx.res.statusCode = 500
         // no next!!
+    }
+});
+
+// admin auth
+app.use(async (ctx, next) => {
+    if (
+        !ctx.request.url.match(/^\/admin\//) ||
+        ctx.request.url.match(/^\/admin\/auth/)
+    ) {
+        // skip admin auth now
+        return next()
+    }
+    try {
+        const authKey = ctx.request.get('Auth')
+        const authObject = JSON.parse(Base64.decode(authKey));
+
+        if (!("placeId" in authObject || "password" in authObject)) {
+            // invalid format: get out!
+            ctx.res.statusCode = 401
+        } else {
+            const { placeId, password } = authObject
+            if (!await DAL.adminAuth(placeId, password)) {
+                ctx.res.statusCode = 401
+            } else {
+              ctx.state.auth = {
+                  placeId,
+                  authKey,
+              }
+              return next();
+            }
+        }
+    } catch(e) {
+        if (!(e instanceof SyntaxError)) { // fail silently when 
+            console.log(e)
+        }
+        ctx.res.statusCode = 500
     }
 });
 
@@ -121,22 +161,29 @@ router.get("/place/:placeId", async ctx => {
     }
 })
 
-router.post("/admin/auth", async ctx => {
-    try {
-        if (
-            ctx.request.body.placeId !== undefined &&
-            ctx.request.body.password !== undefined &&
-            await DAL.adminAuth(ctx.request.body.placeId, ctx.request.body.password)
-        ) {
-            ctx.res.statusCode = 200
-        } else {
-            throw new Error("login_failed")
+router.route({
+    method: "post",
+    path: "/admin/auth",
+    validate: {
+        type: "json",
+        body: {
+            placeId: Joi.string(),
+            password: Joi.string().max(50),
         }
-    } catch(e) {
-        ctx.res.statusMessage = "Bad login o password"
-        ctx.res.statusCode = 401
-        if (!(e instanceof Error && e.message == 'login_failed') && !(e instanceof DAL.ErrorPlaceNotFound)) {
-            console.log(e)
+    },
+    handler: async ctx => {
+        try {
+            if (await DAL.adminAuth(ctx.request.body.placeId, ctx.request.body.password)) {
+                ctx.res.statusCode = 200
+            } else {
+                throw new Error("login_failed")
+            }
+        } catch(e) {
+            ctx.res.statusMessage = "Bad login o password"
+            ctx.res.statusCode = 401
+            if (!(e instanceof Error && e.message == 'login_failed') && !(e instanceof DAL.ErrorPlaceNotFound)) {
+                console.log(e)
+            }
         }
     }
 })
@@ -147,7 +194,7 @@ router.route({
     validate: {
         type: "json",
         body: {
-            placeName: Joi.string().max(50),
+            placeName: Joi.string().min(10).max(50),
             password: Joi.string().min(8).max(50),
         }
     },
@@ -163,6 +210,46 @@ router.route({
                     placeId
                 }
             }
+        } catch(e) {
+            console.log(e)
+            ctx.res.statusCode = 500
+        }
+    }
+})
+
+router.get("/admin/place", async ctx => {
+    try {
+        let [ place, visits ] = await Promise.all([
+            DAL.getPlace(ctx.state.auth.placeId),
+            DAL.getVisitsByPlace(ctx.state.auth.placeId),
+        ])
+        ctx.body = {
+            id: place.id,
+            name: place.name,
+            opens: place.opens,
+            closes: place.closes,
+            visits: visits
+        }
+    } catch(e) {
+        console.log(e)
+        ctx.res.statusCode = 500
+    }
+})
+
+router.route({
+    method: "PATCH",
+    path: "/admin/visits",
+    validate: {
+        type: "json",
+        body: Joi.array().items(Joi.object().keys({
+            visitor_id: Joi.string(),
+            visitor: Joi.string().allow('')
+        }))
+    },
+    handler: async ctx => {
+        try {
+            const place = await DAL.getPlace(ctx.state.auth.placeId)
+            ctx.body = await DAL.adminUpdateVisits(place.id, ctx.request.body)
         } catch(e) {
             console.log(e)
             ctx.res.statusCode = 500

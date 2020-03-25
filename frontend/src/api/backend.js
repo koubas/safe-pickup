@@ -41,9 +41,13 @@ export async function adminAuth(placeId, password) {
         },
         body: JSON.stringify({ placeId, password }),
     })
-    return {
+    const result = {
         statusCode: res.status
     }
+    if (res.statusCode === 200) {
+        result.place = await res.json()
+    }
+    return result
 }
 
 export async function registerPlace(placeName, password) {
@@ -57,4 +61,43 @@ export async function registerPlace(placeName, password) {
     return {
         statusCode: res.status
     }
+}
+
+export async function adminGetPlace(authKey) {
+    const res = await fetch(`${apiUrl}/admin/place`, {
+        headers: {
+            Auth: authKey
+        }
+    })
+    let result = {
+        statusCode: res.status
+    }
+    if (res.status === 200) {
+        result = {
+            ...result,
+            ...await res.json(),
+        }
+    }
+    return result
+}
+
+export async function adminUpdateVisits(visitUpdates, authKey) {
+    const res = await fetch(`${apiUrl}/admin/visits`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Auth: authKey,
+        },
+        body: JSON.stringify(visitUpdates),
+    })
+    let result = {
+        statusCode: res.status
+    }
+    if (res.status === 200) {
+        result = {
+            ...result,
+            ...await res.json(),
+        }
+    }
+    return result
 }

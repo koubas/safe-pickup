@@ -9,10 +9,12 @@
     "aws-sdk": "^2.643.0",
     "aws-serverless-koa": "^1.0.1",
     "bcrypt": "^4.0.1",
+    "js-base64": "^2.5.2",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-joi-router": "^6.0.2",
-    "moment-timezone": "^0.5.28"
+    "moment-timezone": "^0.5.28",
+    "randomstring": "^1.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

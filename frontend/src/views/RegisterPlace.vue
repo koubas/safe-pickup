@@ -19,14 +19,14 @@
           <v-text-field
             v-model="placeName"
             label="Název"
-            :rules="commonRules"
+            :rules="placeNameRules"
             required
             filled
           />
           <v-text-field
             v-model="password1"
             label="Heslo"
-            :rules="commonRules"
+            :rules="passwordRules"
             required
             autocomplete="off"
             type="password"
@@ -35,7 +35,7 @@
           <v-text-field
             v-model="password2"
             label="Heslo znovu"
-            :rules="commonRules"
+            :rules="passwordRules"
             required
             autocomplete="off"
             type="password"
@@ -72,8 +72,19 @@ export default {
       placeName: "",
       password1: "",
       password2: "",
-      commonRules: [
+      placeNameRules: [
         v => !!v || 'Povinné pole',
+        v => (v || '').length <= 50 ||
+              `Příliš dlouhý název`,
+        v => (v || '').length >= 10 ||
+              `Příliš krátký název`,
+      ],
+      passwordRules: [
+        v => !!v || 'Povinné pole',
+        v => (v || '').length <= 50 ||
+              `Příliš dlouhé heslo`,
+        v => (v || '').length >= 8 ||
+              `Příliš krátké heslo`,
       ],
     }
   },

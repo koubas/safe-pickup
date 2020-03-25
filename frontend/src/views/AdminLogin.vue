@@ -51,6 +51,7 @@
 
 <script>
 import { adminAuth } from "@/api/backend.js"
+import { Base64 } from 'js-base64'
 
 export default {
   name: "AdminLogin",
@@ -69,10 +70,15 @@ export default {
   },
   methods: {
     async submit() {
-        if ((await adminAuth(this.placeId, this.password)).statusCode !== 200) {
+        const result = await adminAuth(this.placeId, this.password)
+        if (result.statusCode !== 200) {
             this.errorMessage = "Špatné ID nebo heslo, zkuste to znovu"
         } else {
             this.errorMessage = ""
+            const { placeId, password } = this
+            this.$router.push({ name: 'AdminPlace', params: {
+              authKey: Base64.encode(JSON.stringify({ placeId, password }))
+            }})
         }
     },
   },
