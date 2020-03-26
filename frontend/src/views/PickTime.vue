@@ -1,8 +1,24 @@
 <template>
   <div>
-    <h1 class="headline">Bezpečný výdej</h1>
-    <h2 class="subtitle-1" style="color: rgb(0, 0, 0, 0.6)">{{ place.name }}</h2>
-    <TimeAxis :place="place" @end="startSaveTimeout" />
+    <v-card
+      class="mx-auto"
+      max-width="1200"
+      width="100%"
+    >
+      <v-card-title class="headline">{{ place.name }}</v-card-title>
+      <v-card-subtitle>Bezpečný výdej</v-card-subtitle>
+      <v-card-text>
+        <p>
+          Posuvníkem zvolte čas, kdy se dostavíte na výdejní místo. Volte dobu v intervalech mezi návštěvami jiných zákazníků, vyznačených tečkami
+          na časové ose. Snažte se prosím na výdejní místo dorazit včas, ale pokud zjistíte, že to nestihnete, vybrte si nový čas posuvníkem, jak jen to bude možné.
+        </p>
+        <p>Děkujeme</p>
+      </v-card-text>
+      <v-card-text>
+        <TimeAxis :place="place" @end="startSaveTimeout" />
+      </v-card-text>
+      <div style="height: 5em"></div>
+    </v-card>
     <v-snackbar
       v-model="saveSnack"
       :timeout="0"
@@ -18,7 +34,7 @@
     </v-snackbar>
     <v-snackbar
       v-model="saveDone"
-      :timeout="2000"
+      :timeout="1000"
       color="success"
     >
       Uloženo!
@@ -28,7 +44,7 @@
 
 <script>
 import TimeAxis from "@/components/TimeAxis.vue";
-import { updateVisit } from "@/api/backend.js"
+import { updateVisit, getPlace } from "@/api/backend.js"
 
 export default {
   name: "PickTime",
@@ -74,12 +90,20 @@ export default {
     async save() {
       await updateVisit(this.saveMoment.toISOString(true), this.visitorCode)
       this.saveDone = true
-    }
+    },
+    async refrestVisits() {
+      const freshPlace = await getPlace(this.placeId, this.place.myVisit.visitor_id)
+      this.place = {
+        ...this.place,
+        visits: freshPlace.visits
+      }
+    },
   },
   mounted() {
     if (this.place === undefined) {
       this.$router.push({ name: 'Home', params: { placeId: this.placeId }})
     }
+    setInterval(this.refrestVisits, 10000)
   }
 };
 </script>

@@ -69,7 +69,7 @@ export default {
           return
         }
         const at = (new Date(visit.at)).getTime()
-        const percent = 100 - (at - this.min) / (this.max - this.min) * 100
+        const percent = (this.vertical ? 100 : 0) - (at - this.min) / (this.max - this.min) * 100 * (this.vertical ? 1 : -1)
         let newElm = document.createElement('div')
         newElm.style.position = 'absolute'
         if (this.vertical) {
@@ -110,6 +110,9 @@ export default {
   watch: {
     vertical() {
       this.drawVisits()
+    },
+    place() {
+      this.drawVisits()
     }
   }
 };
@@ -132,10 +135,10 @@ export default {
   }
 
   .portrait /deep/.v-slider {
-    height: calc(92vh - 10em);
+    height: calc(80vh - 10em);
   }
 
   .landscape {
-    padding: calc(5em + 20vh) 5em 0 5em;
+    padding: 1em 5em 0 5em;
   }
 </style>

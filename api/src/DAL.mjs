@@ -173,7 +173,7 @@ export async function registerPlace(placeName, email, password) {
                 admin_password: await bcrypt.hash(password, await bcrypt.genSalt()),
                 email: email,
                 created: moment().toISOString(true),
-                approved: false,
+                approved: true,
             }
         },
         (err) =>{
