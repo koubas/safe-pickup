@@ -8,10 +8,58 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+    <style>
+      #home-page {
+        font-family: Roboto, sans-serif;
+        font-weight: 300;
+        line-height: 1.5;
+        font-size: 16sp;
+        margin: 5em auto 0 auto;
+        width: 35em;
+      }
+      #home-page h1 {
+        display: inline;
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0;
+        padding: 0;
+        padding-right: 5px;
+      }
+      #home-page h2 {
+        font-size: 18px;
+        font-weight: 500;
+        font-style: italic;
+        padding: 2em 0 1em 0;
+      }
+      #home-page li {
+        margin: 0 0 1em 1.5em;
+        padding-left: .8em;
+      }
+      #home-page #menu {
+        text-align: center;
+        padding: 2em 0 1em 0;
+      }
+      #home-page #menu > a {
+        padding: 2em
+      }
+    </style>
   </head>
   <body class="body">
     <div id="home-page">
-      Homepage content
+      <p style="text-align: justify;">
+        <h1>bezpecnyvydej.cz</h1> pomáhá vaším zákazníkům s bezpečným převzetím zboží minimalizací setkávání se s ostatními zákazníky, případně i personálem.
+        Redukuje tvoření front a umožňuje vám efektivnější kompletaci předávaného zboží v ten správný čas.
+      </p>
+      <p id="menu">
+        <a href="/register-place">registrace výdejního místa</a>
+        <a href="/admin">administrace výdejního místa</a>
+      </p>
+      <h2>Jak to funguje?</h2>
+      <ol>
+        <li>Zákazník si objendá zboží k osobnímu odběru a obdrží kód objednávky + odkaz na sekci vašeho obchodu na bezpecnyvydej.cz.</li>
+        <li>Zde v sekci vašeho obchodu zadá svůj kód objednávky, tím se dostane na časovou osu, kde uvidí ostatní zákazníky a přibližné časy jejích výskytu na výdejním místě.</li>
+        <li>Posuvníkem na časové ose vybere čas plánovaného vyzvednutí zboží, ve vlastním zájmu v dostatečném časovém rozestupu od ostatních zákazníků. Pohybem posuvníku se jeho volba automaticky uloží.</li>
+      </ol>
     </div>
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>

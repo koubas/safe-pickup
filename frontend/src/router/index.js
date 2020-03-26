@@ -8,7 +8,7 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/pick-time",
+    path: "/pick-time/:placeId",
     name: "PickTime",
     props: true,
     component: () =>

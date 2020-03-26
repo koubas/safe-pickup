@@ -185,7 +185,7 @@
 </template>
 
 <script>
-import { adminGetPlace, adminUpdateVisits } from "@/api/backend.js"
+import { adminGetPlace, adminUpdateVisits, adminUpdatePlace } from "@/api/backend.js"
 import moment from 'moment-timezone'
 
 export default {
@@ -226,7 +226,11 @@ export default {
     }
   },
   async mounted() {
-    this.place = await adminGetPlace(this.authKey)
+    if (this.authKey === undefined) {
+      return this.$router.push({ name: 'AdminLogin' })
+    }
+
+    await this.loadPlace()
     this.opensDate = moment(this.place.opens).format("YYYY-MM-DD")
     this.opensTime = moment(this.place.opens).format("HH:mm")
     this.closesDate = moment(this.place.closes).format("YYYY-MM-DD")
@@ -236,12 +240,11 @@ export default {
   },
   methods: {
     async submit() {
-      const placeUpdated = {
-        ...this.place,
+      const placeUpdate = {
         opens: moment(`${this.opensDate} ${this.opensTime}`).toISOString(true),
         closes: moment(`${this.closesDate} ${this.closesTime}`).toISOString(true),
       }
-      console.log(placeUpdated)
+      adminUpdatePlace(placeUpdate, this.authKey)
     },
     visitsToCsv() {
       console.log(this.place)
@@ -288,7 +291,11 @@ export default {
       } else {
         alert(errors)
       }
+      await this.loadPlace()
     },
+    async loadPlace() {
+      this.place = await adminGetPlace(this.authKey)
+    }
   },
 }
 </script>

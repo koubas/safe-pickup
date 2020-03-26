@@ -37,6 +37,7 @@ export default {
   },
   props: {
     place: Object,
+    placeId: String,
     visitorCode: String,
   },
   data() {
@@ -76,7 +77,9 @@ export default {
     }
   },
   mounted() {
-    console.log(this.place)
+    if (this.place === undefined) {
+      this.$router.push({ name: 'Home', params: { placeId: this.placeId }})
+    }
   }
 };
 </script>

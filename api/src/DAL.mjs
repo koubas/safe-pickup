@@ -1,5 +1,5 @@
 import AWS from 'aws-sdk'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import moment from 'moment-timezone'
 import randomString from 'randomstring'
 
@@ -181,6 +181,30 @@ export async function registerPlace(placeName, email, password) {
                 reject(err)
             } else {
                 resolve(placeId)
+            }
+        })
+    })
+}
+
+export async function adminUpdatePlace(placeId, opens, closes) {
+    const docClient = new AWS.DynamoDB.DocumentClient()
+    await new Promise(async (resolve, reject) =>{
+        docClient.update({
+            TableName: "safe-pickup-place",
+            Key: {
+                id: placeId,
+            },
+            UpdateExpression: "SET opens = :opens, closes = :closes",
+            ExpressionAttributeValues: {
+                ":opens": opens,
+                ":closes": closes,
+            }
+        },
+        (err) =>{
+            if (err !== null) {
+                reject(err)
+            } else {
+                resolve()
             }
         })
     })
