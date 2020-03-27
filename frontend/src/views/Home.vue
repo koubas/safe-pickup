@@ -72,9 +72,10 @@ export default {
       }
     },
     async submit() {
-      const place = await getPlace(this.$route.params.placeId, this.visitorCode)
+      const visitorId = this.visitorCode.toLowerCase().trim() // todo: refactor "visitorCode"
+      const place = await getPlace(this.$route.params.placeId, visitorId)
       if (place.statusCode === 200) {
-        this.$router.push({ name: 'PickTime', params: { place, placeId: place.id, visitorCode: `${place.id}-${this.visitorCode}` } })
+        this.$router.push({ name: 'PickTime', params: { place, placeId: place.id, visitorCode: `${place.id}-${visitorId}` } })
       } else if (place.statusCode === 401) {
         this.errorMessage = "Neplatný ověřovací kód, zkuste jej zadat znovu"
       } else {

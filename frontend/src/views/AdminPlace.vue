@@ -15,11 +15,18 @@
       <v-card-title class="headline">Správa výdejního místa</v-card-title>
       <v-card-subtitle>{{ place.name }}</v-card-subtitle>
       <v-card-text>
+        <v-text-field
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Hledat"
+          single-line
+          hide-details
+        />
         <v-data-table
           :headers="headers"
-          :items="place.visits"
+          :items="visitsEnhanced"
+          :search="search"
           class="elevation-1"
-          hide-default-footer
         />
       </v-card-text>
       <v-card-text class="d-flex justify-end">
@@ -32,7 +39,8 @@
           <v-card-text>
             <v-textarea
               v-model="visitsCsv"
-              label="CSV sloupce: kód, zákazník"
+              label="CSV s aktuálními objednávkami (sloupce: ověřovací kód, identtifikátor (např. jméno, nebo ID z vašeho systému) "
+              :placeholder="'\nPříklad:\n1234, Jan Novák\n5678, Rudolf Skočdopole\n789az-235-cb489, 5679867'"
               rows="15"
             />
           </v-card-text>
@@ -199,7 +207,8 @@ export default {
     return {
       errorMessage: "",
       place: {
-        place: 'loading...',
+        name: 'loading...',
+        visits: [],
       },
 
       valid: true,
@@ -214,16 +223,25 @@ export default {
       closesTimeMenu: false,
       closesTime: "",
 
+      search: "",
       headers: [
         { text: "Kód", value: "visitor_id" },
         { text: "Zákazník", value: "visitor" },
-        { text: "Čas", value: "at"}
+        { text: "Čas", value: "at", },
       ],
 
       editVisitsDialog: false,
       visitsCsv: "",
       visitsCsvPrev: "",
     }
+  },
+  computed: {
+    visitsEnhanced() {
+      return this.place.visits.map((visit) => ({
+        ...visit,
+        at: visit.at.length < 3 ? "" : moment(visit.at).format("D.M.YYYY HH:mm")
+      }))
+    },
   },
   async mounted() {
     if (this.authKey === undefined) {
@@ -270,8 +288,8 @@ export default {
 
       const errors = lines.reduce((error, line) => {
         if (error === null) {
-          if (!line.match(/^\s*[a-zA-Z0-9_-]{4,20}\s*,/)) {
-            return `Neplatný formát identifikátoru, nebo za ním chybí čárka ("${line}")`
+          if (!line.match(/^\s*[a-zA-Z0-9-]{4,20}\s*,/)) {
+            return `Neplatný formát kódu (min. 4 znaky a-z, 0-9, -), nebo za ním chybí čárka ("${line}")`
           }
           if (!line.match(/^[^,]+,[^,]*$/)) {
             return `Každý řádek může obsahovat pouze jednu čárku ("${line}")`
@@ -281,8 +299,11 @@ export default {
       }, null)
       if (errors === null) {
         const visitUpdates = lines.map(line => {
-          const [ , visitor_id, visitor ] = line.match(/^\s*([a-zA-Z0-9_-]{4,20})\s*,\s*(.*)\s*$/)
-          return { visitor_id, visitor }
+          const [ visitor_id, visitor ] = line.split(",")
+          return {
+            visitor_id: visitor_id.trim().toLowerCase(),
+            visitor: visitor.trim(),
+          }
         })
 
         await adminUpdateVisits(visitUpdates, this.authKey)
