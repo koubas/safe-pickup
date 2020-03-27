@@ -5,6 +5,7 @@
       class="large-slider"
       v-model="slider"
       @end="emitEnd"
+      @click="emitEnd"
       :min="min"
       :max="max"
       thumb-label="always"
@@ -30,6 +31,7 @@ export default {
   data() {
     return {
       slider: 0,
+      sliderLast: 0,
       vertical: true,
       visitElms: [],
     };
@@ -50,9 +52,12 @@ export default {
 
   methods: {
     emitEnd() {
-      this.$emit("end", {
-        moment: new moment(this.slider)
-      })
+      if (this.slider !== this.sliderLast) {
+        this.$emit("end", {
+          moment: new moment(this.slider)
+        })
+        this.sliderLast = this.slider
+      }
     },
     orientationChange() {
       this.vertical = window.screen.orientation.type.match(/portrait/) !== null

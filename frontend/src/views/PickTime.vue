@@ -63,6 +63,7 @@ export default {
       saveTimeout: 0,
       saveInterval: null,
       saveDone: false,
+      refreshInterval: null,
     }
   },
   methods: {
@@ -103,7 +104,10 @@ export default {
     if (this.place === undefined) {
       this.$router.push({ name: 'Home', params: { placeId: this.placeId }})
     }
-    setInterval(this.refrestVisits, 10000)
+    this.refreshInterval = setInterval(this.refrestVisits, 10000)
+  },
+  destroyed() {
+    clearInterval(this.refreshInterval)
   }
 };
 </script>
