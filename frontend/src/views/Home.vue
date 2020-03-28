@@ -1,17 +1,9 @@
 <template>
   <div>
-    <v-alert
-      prominent
-      type="error"
-      v-if="errorMessage !== ''"
-    >
+    <v-alert prominent type="error" v-if="errorMessage !== ''">
       {{ errorMessage }}
     </v-alert>
-    <v-card
-      class="mx-auto"
-      max-width="500"
-      width="100%"
-    >
+    <v-card class="mx-auto" max-width="500" width="100%">
       <v-card-title class="headline">Bezpečný výdej</v-card-title>
       <v-card-subtitle>{{ place.name }}</v-card-subtitle>
       <v-form v-model="valid" @submit="submit()" @submit.prevent>
@@ -27,12 +19,7 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-btn 
-            :disabled="!valid"
-            color="success"
-            class="mr-4"
-            type="submit"
-          >
+          <v-btn :disabled="!valid" color="success" class="mr-4" type="submit">
             Přihlásit
           </v-btn>
         </v-card-actions>
@@ -45,18 +32,15 @@
 import { getPlacePublicInfo, getPlace } from "@/api/backend.js"
 export default {
   name: "Home",
-  components: {
-  },
+  components: {},
   data() {
     return {
       errorMessage: "",
       valid: false,
       visitorCode: "",
-      visitorCodeRules: [
-        v => !!v || 'Kód je povinný',
-      ],
+      visitorCodeRules: [v => !!v || "Kód je povinný"],
       place: {
-        name: "načítám...",
+        name: "načítám..."
       }
     }
   },
@@ -75,13 +59,20 @@ export default {
       const visitorId = this.visitorCode.toLowerCase().trim() // todo: refactor "visitorCode"
       const place = await getPlace(this.$route.params.placeId, visitorId)
       if (place.statusCode === 200) {
-        this.$router.push({ name: 'PickTime', params: { place, placeId: place.id, visitorCode: `${place.id}-${visitorId}` } })
+        this.$router.push({
+          name: "PickTime",
+          params: {
+            place,
+            placeId: place.id,
+            visitorCode: `${place.id}-${visitorId}`
+          }
+        })
       } else if (place.statusCode === 401) {
         this.errorMessage = "Neplatný ověřovací kód, zkuste jej zadat znovu"
       } else {
         this.errorMessage = "Ups! Něco se pokazilo :("
       }
-    },
+    }
   },
   watch: {
     $route() {
@@ -92,10 +83,10 @@ export default {
   mounted() {
     this.updatePlaceId()
   }
-};
+}
 </script>
 
 <style scoped>
-  .v-card {
-  }
+.v-card {
+}
 </style>

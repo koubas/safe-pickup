@@ -1,10 +1,10 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
-import Home from "../views/Home.vue";
-import AdminLogin from "../views/AdminLogin.vue";
-import AdminPlace from "../views/AdminPlace.vue";
+import Vue from "vue"
+import VueRouter from "vue-router"
+import Home from "../views/Home.vue"
+import AdminLogin from "../views/AdminLogin.vue"
+import AdminPlace from "../views/AdminPlace.vue"
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const routes = [
   {
@@ -15,12 +15,13 @@ const routes = [
       import(/* webpackChunkName: "pick-time" */ "../views/PickTime.vue")
   },
 
-
   {
     path: "/register-place",
     name: "RegisterPlace",
     component: () =>
-      import(/* webpackChunkName: "register-place" */ "../views/RegisterPlace.vue")
+      import(
+        /* webpackChunkName: "register-place" */ "../views/RegisterPlace.vue"
+      )
   },
 
   // admin routes
@@ -48,12 +49,12 @@ const routes = [
     path: "/:placeId",
     name: "Home",
     component: Home
-  },
-];
+  }
+]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   routes
-});
+})
 
-export default router;
+export default router

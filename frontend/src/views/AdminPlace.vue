@@ -1,17 +1,9 @@
 <template>
   <div>
-    <v-alert
-      prominent
-      type="error"
-      v-if="errorMessage !== ''"
-    >
+    <v-alert prominent type="error" v-if="errorMessage !== ''">
       {{ errorMessage }}
     </v-alert>
-    <v-card
-      class="mx-auto"
-      max-width="1000"
-      width="100%"
-    >
+    <v-card class="mx-auto" max-width="1000" width="100%">
       <v-card-title class="headline">Správa výdejního místa</v-card-title>
       <v-card-subtitle>{{ place.name }}</v-card-subtitle>
       <v-card-text>
@@ -30,27 +22,37 @@
         />
       </v-card-text>
       <v-card-text class="d-flex justify-end">
-      <v-dialog v-model="editVisitsDialog" persistent max-width="900">
-        <template v-slot:activator="{ on }">
-          <v-btn color="green darken" text dark v-on="on">Upravit seznam vyzvednutí</v-btn>
-        </template>
-        <v-card>
-          <v-card-title class="headline">Editace seznamu vyzvednutí</v-card-title>
-          <v-card-text>
-            <v-textarea
-              v-model="visitsCsv"
-              label="CSV s aktuálními objednávkami (sloupce: ověřovací kód, identtifikátor (např. jméno, nebo ID z vašeho systému) "
-              :placeholder="'\nPříklad:\n1234, Jan Novák\n5678, Rudolf Skočdopole\n789az-235-cb489, 5679867'"
-              rows="15"
-            />
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="cancelCsvDialog">Zrušit</v-btn>
-            <v-btn color="green darken-1" text @click="saveCsvAndCloseDialog">Uložit</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        <v-dialog v-model="editVisitsDialog" persistent max-width="900">
+          <template v-slot:activator="{ on }">
+            <v-btn color="green darken" text dark v-on="on"
+              >Upravit seznam vyzvednutí</v-btn
+            >
+          </template>
+          <v-card>
+            <v-card-title class="headline"
+              >Editace seznamu vyzvednutí</v-card-title
+            >
+            <v-card-text>
+              <v-textarea
+                v-model="visitsCsv"
+                label="CSV s aktuálními objednávkami (sloupce: ověřovací kód, identtifikátor (např. jméno, nebo ID z vašeho systému) "
+                :placeholder="
+                  '\nPříklad:\n1234, Jan Novák\n5678, Rudolf Skočdopole\n789az-235-cb489, 5679867'
+                "
+                rows="15"
+              />
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="cancelCsvDialog"
+                >Zrušit</v-btn
+              >
+              <v-btn color="green darken-1" text @click="saveCsvAndCloseDialog"
+                >Uložit</v-btn
+              >
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-card-text>
       <v-card-subtitle>Podrobnosti o výdejním místě</v-card-subtitle>
       <v-form v-model="valid" @submit="submit()" @submit.prevent>
@@ -85,8 +87,15 @@
                 </template>
                 <v-date-picker v-model="opensDate" no-title scrollable>
                   <v-spacer></v-spacer>
-                  <v-btn text color="primary" @click="opensDate = false">Zrušit</v-btn>
-                  <v-btn text color="primary" @click="$refs.opensDateMenu.save(opensDate)">OK</v-btn>
+                  <v-btn text color="primary" @click="opensDate = false"
+                    >Zrušit</v-btn
+                  >
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.opensDateMenu.save(opensDate)"
+                    >OK</v-btn
+                  >
                 </v-date-picker>
               </v-menu>
             </v-col>
@@ -141,8 +150,15 @@
                 </template>
                 <v-date-picker v-model="closesDate" no-title scrollable>
                   <v-spacer></v-spacer>
-                  <v-btn text color="primary" @click="closesDateMenu = false">Zrušit</v-btn>
-                  <v-btn text color="primary" @click="$refs.closesDateMenu.save(closesDate)">OK</v-btn>
+                  <v-btn text color="primary" @click="closesDateMenu = false"
+                    >Zrušit</v-btn
+                  >
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="$refs.closesDateMenu.save(closesDate)"
+                    >OK</v-btn
+                  >
                 </v-date-picker>
               </v-menu>
             </v-col>
@@ -178,12 +194,7 @@
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-btn 
-            disabledx="!valid"
-            color="success"
-            class="mr-4"
-            type="submit"
-          >
+          <v-btn disabledx="!valid" color="success" class="mr-4" type="submit">
             Uložit
           </v-btn>
         </v-card-actions>
@@ -193,22 +204,25 @@
 </template>
 
 <script>
-import { adminGetPlace, adminUpdateVisits, adminUpdatePlace } from "@/api/backend.js"
-import moment from 'moment-timezone'
+import {
+  adminGetPlace,
+  adminUpdateVisits,
+  adminUpdatePlace
+} from "@/api/backend.js"
+import moment from "moment-timezone"
 
 export default {
   name: "AdminPlace",
-  components: {
-  },
+  components: {},
   props: {
-    authKey: String,
+    authKey: String
   },
   data() {
     return {
       errorMessage: "",
       place: {
-        name: 'loading...',
-        visits: [],
+        name: "loading...",
+        visits: []
       },
 
       valid: true,
@@ -227,25 +241,25 @@ export default {
       headers: [
         { text: "Kód", value: "visitor_id" },
         { text: "Zákazník", value: "visitor" },
-        { text: "Čas", value: "at", },
+        { text: "Čas", value: "at" }
       ],
 
       editVisitsDialog: false,
       visitsCsv: "",
-      visitsCsvPrev: "",
+      visitsCsvPrev: ""
     }
   },
   computed: {
     visitsEnhanced() {
-      return this.place.visits.map((visit) => ({
+      return this.place.visits.map(visit => ({
         ...visit,
         at: visit.at.length < 3 ? "" : moment(visit.at).format("D.M.YYYY HH:mm")
       }))
-    },
+    }
   },
   async mounted() {
     if (this.authKey === undefined) {
-      return this.$router.push({ name: 'AdminLogin' })
+      return this.$router.push({ name: "AdminLogin" })
     }
 
     await this.loadPlace()
@@ -260,7 +274,9 @@ export default {
     async submit() {
       const placeUpdate = {
         opens: moment(`${this.opensDate} ${this.opensTime}`).toISOString(true),
-        closes: moment(`${this.closesDate} ${this.closesTime}`).toISOString(true),
+        closes: moment(`${this.closesDate} ${this.closesTime}`).toISOString(
+          true
+        )
       }
       adminUpdatePlace(placeUpdate, this.authKey)
     },
@@ -283,8 +299,8 @@ export default {
     },
     async saveCsvAndCloseDialog() {
       const lines = this.visitsCsv
-      .split("\n")
-      .filter(line => !line.match(/^\s*$/))
+        .split("\n")
+        .filter(line => !line.match(/^\s*$/))
 
       const errors = lines.reduce((error, line) => {
         if (error === null) {
@@ -299,10 +315,10 @@ export default {
       }, null)
       if (errors === null) {
         const visitUpdates = lines.map(line => {
-          const [ visitor_id, visitor ] = line.split(",")
+          const [visitor_id, visitor] = line.split(",")
           return {
             visitor_id: visitor_id.trim().toLowerCase(),
-            visitor: visitor.trim(),
+            visitor: visitor.trim()
           }
         })
 
@@ -317,6 +333,6 @@ export default {
     async loadPlace() {
       this.place = await adminGetPlace(this.authKey)
     }
-  },
+  }
 }
 </script>

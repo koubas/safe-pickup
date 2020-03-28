@@ -9,7 +9,7 @@
       :min="min"
       :max="max"
       thumb-label="always"
-      thumb-size=62
+      thumb-size="62"
       :vertical="vertical"
     >
       <template v-slot:thumb-label>
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import moment from 'moment-timezone'
+import moment from "moment-timezone"
 export default {
   name: "TimeAxis",
   components: {},
@@ -33,20 +33,26 @@ export default {
       slider: 0,
       sliderLast: 0,
       vertical: true,
-      visitElms: [],
-    };
+      visitElms: []
+    }
   },
 
   computed: {
     min() {
-      return (new Date(this.place.opens)).getTime()
+      return new Date(this.place.opens).getTime()
     },
     max() {
-      return (new Date(this.place.closes)).getTime()
+      return new Date(this.place.closes).getTime()
     },
     formatedTime() {
       const date = new Date(this.slider)
-      return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
+      return `${date
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${date
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`
     }
   },
 
@@ -73,25 +79,29 @@ export default {
           // space means empty (dynamodb)
           return
         }
-        const at = (new Date(visit.at)).getTime()
-        const percent = (this.vertical ? 100 : 0) - (at - this.min) / (this.max - this.min) * 100 * (this.vertical ? 1 : -1)
-        let newElm = document.createElement('div')
-        newElm.style.position = 'absolute'
+        const at = new Date(visit.at).getTime()
+        const percent =
+          (this.vertical ? 100 : 0) -
+          ((at - this.min) / (this.max - this.min)) *
+            100 *
+            (this.vertical ? 1 : -1)
+        let newElm = document.createElement("div")
+        newElm.style.position = "absolute"
         if (this.vertical) {
-          newElm.style.top = `${ percent }%`
-          newElm.style.left = '50%'
-          newElm.style.marginTop = '-5px'
-          newElm.style.marginLeft = '-5px'
+          newElm.style.top = `${percent}%`
+          newElm.style.left = "50%"
+          newElm.style.marginTop = "-5px"
+          newElm.style.marginLeft = "-5px"
         } else {
-          newElm.style.left = `${ percent }%`
-          newElm.style.top = '50%'
-          newElm.style.marginTop = '-5px'
-          newElm.style.marginLeft = '-5px'
+          newElm.style.left = `${percent}%`
+          newElm.style.top = "50%"
+          newElm.style.marginTop = "-5px"
+          newElm.style.marginLeft = "-5px"
         }
-        newElm.style.borderRadius = '50%'
-        newElm.style.width = '10px'
-        newElm.style.height = '10px'
-        newElm.style.backgroundColor = 'maroon'
+        newElm.style.borderRadius = "50%"
+        newElm.style.width = "10px"
+        newElm.style.height = "10px"
+        newElm.style.backgroundColor = "maroon"
         sliderElm.parentNode.insertBefore(newElm, sliderElm.previousSibling)
         this.visitElms.push(newElm)
       })
@@ -99,16 +109,16 @@ export default {
   },
 
   created() {
-      this.orientationChange()
-      window.addEventListener("orientationchange", this.orientationChange)
+    this.orientationChange()
+    window.addEventListener("orientationchange", this.orientationChange)
   },
 
   destroyed() {
-      window.removeEventListener("orientationchange", this.orientationChange)
+    window.removeEventListener("orientationchange", this.orientationChange)
   },
 
   mounted() {
-    this.slider = (new Date(this.place.myVisit.at)).getTime()
+    this.slider = new Date(this.place.myVisit.at).getTime()
     this.drawVisits()
   },
 
@@ -120,30 +130,30 @@ export default {
       this.drawVisits()
     }
   }
-};
+}
 </script>
 
 <style>
-  html, body {
-    /*touch-action: none;*/
-    
-  }
-  * {
-    overscroll-behavior: none
-  }
+html,
+body {
+  /*touch-action: none;*/
+}
+* {
+  overscroll-behavior: none;
+}
 </style>
 
 <style scoped>
-  .container.portrait  {
-    margin: 0 0 0 0;
-    width: 10em;
-  }
+.container.portrait {
+  margin: 0 0 0 0;
+  width: 10em;
+}
 
-  .portrait /deep/.v-slider {
-    height: calc(80vh - 10em);
-  }
+.portrait /deep/.v-slider {
+  height: calc(80vh - 10em);
+}
 
-  .landscape {
-    padding: 1em 5em 0 5em;
-  }
+.landscape {
+  padding: 1em 5em 0 5em;
+}
 </style>

@@ -1,16 +1,15 @@
 <template>
   <div>
-    <v-card
-      class="mx-auto"
-      max-width="1200"
-      width="100%"
-    >
+    <v-card class="mx-auto" max-width="1200" width="100%">
       <v-card-title class="headline">{{ place.name }}</v-card-title>
       <v-card-subtitle>Bezpečný výdej</v-card-subtitle>
       <v-card-text>
         <p>
-          Posuvníkem zvolte čas, kdy se dostavíte na výdejní místo. Volte dobu v intervalech mezi návštěvami jiných zákazníků, vyznačených tečkami
-          na časové ose. Snažte se prosím na výdejní místo dorazit včas, ale pokud zjistíte, že to nestihnete, vybrte si nový čas posuvníkem, jak jen to bude možné.
+          Posuvníkem zvolte čas, kdy se dostavíte na výdejní místo. Volte dobu v
+          intervalech mezi návštěvami jiných zákazníků, vyznačených tečkami na
+          časové ose. Snažte se prosím na výdejní místo dorazit včas, ale pokud
+          zjistíte, že to nestihnete, vybrte si nový čas posuvníkem, jak jen to
+          bude možné.
         </p>
         <p>Děkujeme</p>
       </v-card-text>
@@ -19,31 +18,20 @@
       </v-card-text>
       <div style="height: 5em"></div>
     </v-card>
-    <v-snackbar
-      v-model="saveSnack"
-      :timeout="0"
-    >
+    <v-snackbar v-model="saveSnack" :timeout="0">
       Výběr bude uložen za {{ saveTimeout }}
-      <v-btn
-        color="pink"
-        text
-        @click="saveNow"
-      >
+      <v-btn color="pink" text @click="saveNow">
         Ulož teď!
       </v-btn>
     </v-snackbar>
-    <v-snackbar
-      v-model="saveDone"
-      :timeout="1000"
-      color="success"
-    >
+    <v-snackbar v-model="saveDone" :timeout="1000" color="success">
       Uloženo!
     </v-snackbar>
   </div>
 </template>
 
 <script>
-import TimeAxis from "@/components/TimeAxis.vue";
+import TimeAxis from "@/components/TimeAxis.vue"
 import { updateVisit, getPlace } from "@/api/backend.js"
 
 export default {
@@ -54,7 +42,7 @@ export default {
   props: {
     place: Object,
     placeId: String,
-    visitorCode: String,
+    visitorCode: String
   },
   data() {
     return {
@@ -63,7 +51,7 @@ export default {
       saveTimeout: 0,
       saveInterval: null,
       saveDone: false,
-      refreshInterval: null,
+      refreshInterval: null
     }
   },
   methods: {
@@ -80,7 +68,6 @@ export default {
           this.save()
         }
       }, 1000)
-      
     },
     saveNow() {
       clearInterval(this.saveInterval)
@@ -93,21 +80,24 @@ export default {
       this.saveDone = true
     },
     async refrestVisits() {
-      const freshPlace = await getPlace(this.placeId, this.place.myVisit.visitor_id)
+      const freshPlace = await getPlace(
+        this.placeId,
+        this.place.myVisit.visitor_id
+      )
       this.place = {
         ...this.place,
         visits: freshPlace.visits
       }
-    },
+    }
   },
   mounted() {
     if (this.place === undefined) {
-      this.$router.push({ name: 'Home', params: { placeId: this.placeId }})
+      this.$router.push({ name: "Home", params: { placeId: this.placeId } })
     }
     this.refreshInterval = setInterval(this.refrestVisits, 10000)
   },
   destroyed() {
     clearInterval(this.refreshInterval)
   }
-};
+}
 </script>
