@@ -7,9 +7,7 @@
         <p>
           Posuvníkem zvolte čas, kdy se dostavíte na výdejní místo. Volte dobu v
           intervalech mezi návštěvami jiných zákazníků, vyznačených tečkami na
-          časové ose. Snažte se prosím na výdejní místo dorazit včas, ale pokud
-          zjistíte, že to nestihnete, vybrte si nový čas posuvníkem, jak jen to
-          bude možné.
+          časové ose. Prosíme o dochvilnost, čas můžete kdykoliv opakovaně změnit posuvníkem.
         </p>
         <p>Děkujeme</p>
       </v-card-text>
