@@ -24,7 +24,7 @@
       <v-card-text class="d-flex justify-end">
         <v-dialog v-model="editVisitsDialog" persistent max-width="900">
           <template v-slot:activator="{ on }">
-            <v-btn color="green darken" text dark v-on="on"
+            <v-btn color="green darken" text dark v-on="on" @click="disablePeriodicRefresh()"
               >Upravit seznam vyzvednutí</v-btn
             >
           </template>
@@ -246,7 +246,9 @@ export default {
 
       editVisitsDialog: false,
       visitsCsv: "",
-      visitsCsvPrev: ""
+      visitsCsvPrev: "",
+
+      periodicRefresh: null
     }
   },
   computed: {
@@ -269,6 +271,7 @@ export default {
     this.closesTime = moment(this.place.closes).format("HH:mm")
 
     this.visitsToCsv()
+    this.enablePeriodicRefresh()
   },
   methods: {
     async submit() {
@@ -296,6 +299,7 @@ export default {
         }
       }
       this.editVisitsDialog = false
+      this.enablePeriodicRefresh()
     },
     async saveCsvAndCloseDialog() {
       const lines = this.visitsCsv
@@ -329,10 +333,28 @@ export default {
         alert(errors)
       }
       await this.loadPlace()
+      this.enablePeriodicRefresh()
     },
     async loadPlace() {
       this.place = await adminGetPlace(this.authKey)
-    }
+    },
+    enablePeriodicRefresh() {
+      console.log('enable periodic refresh')
+      this.periodicRefresh = setInterval(async () => {
+        const freshPlace = await adminGetPlace(this.authKey)
+        this.place = {
+          ... this.place,
+          visits: freshPlace.visits,
+        }
+      }, 3000)
+    },
+    disablePeriodicRefresh() {
+      console.log('disable periodic refresh')
+      if (this.periodicRefresh !== null) {
+        clearInterval(this.periodicRefresh)
+        this.periodicRefresh = null
+      }
+    },
   }
 }
 </script>
