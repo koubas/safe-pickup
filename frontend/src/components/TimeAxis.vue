@@ -10,7 +10,9 @@
       :max="max"
       thumb-label="always"
       thumb-size="62"
+      :thumb-color="sliderThumbColor"
       :vertical="vertical"
+      step="300000"
     >
       <template v-slot:thumb-label>
         {{ formatedTime }}
@@ -32,8 +34,10 @@ export default {
     return {
       slider: 0,
       sliderLast: 0,
+      sliderThumbColor: "green",
       vertical: true,
-      visitElms: []
+      visitElms: [],
+      timestamps: [],
     }
   },
 
@@ -74,11 +78,20 @@ export default {
         elm.remove()
       })
       this.visitElms = []
+
+      // todo: rename method from draw... to update... or move elsewhere
+      this.timestamps = this.place.visits
+        .filter(visit => visit.at.length > 1)
+        .map(visit => (new moment(visit.at).valueOf()))
+
       this.place.visits.forEach(visit => {
         if (visit.at.length <= 1) {
           // space means empty (dynamodb)
           return
         }
+
+        const moreAtSameTime = this.place.visits.filter(_visit => _visit.at === visit.at).length - 1
+
         const at = new Date(visit.at).getTime()
         const percent =
           (this.vertical ? 100 : 0) -
@@ -91,16 +104,18 @@ export default {
           newElm.style.top = `${percent}%`
           newElm.style.left = "50%"
           newElm.style.marginTop = "-5px"
-          newElm.style.marginLeft = "-5px"
+          newElm.style.marginLeft = `${-5 - moreAtSameTime*3}px`
+          newElm.style.width = `${10 + moreAtSameTime*6}px`
+          newElm.style.height = "10px"
         } else {
           newElm.style.left = `${percent}%`
           newElm.style.top = "50%"
-          newElm.style.marginTop = "-5px"
+          newElm.style.marginTop = `${-5 - moreAtSameTime*3}px`
           newElm.style.marginLeft = "-5px"
+          newElm.style.width = "10px"
+          newElm.style.height = `${10 + moreAtSameTime*6}px`
         }
         newElm.style.borderRadius = "50%"
-        newElm.style.width = "10px"
-        newElm.style.height = "10px"
         newElm.style.backgroundColor = "maroon"
         sliderElm.parentNode.insertBefore(newElm, sliderElm.previousSibling)
         this.visitElms.push(newElm)
@@ -128,6 +143,20 @@ export default {
     },
     place() {
       this.drawVisits()
+    },
+    slider(val) {
+      // same time as other
+      if (this.timestamps.some(ts => ts === val)) {
+        this.sliderThumbColor = "red"
+
+      // direct vicinity of other
+      } else if (this.timestamps.some(ts =>  val + 310000 > ts && val - 310000 < ts)) {
+        this.sliderThumbColor = "orange"
+
+      // away from others
+      } else {
+        this.sliderThumbColor = "green"
+      }
     }
   }
 }
